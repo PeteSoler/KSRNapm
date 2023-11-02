@@ -1,45 +1,54 @@
 import tkinter as tk
-import keyboard
+from tkinter import ttk
+from pynput import keyboard
 import time
 
-class KeyboardMonitorApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Keyboard Monitor")
-        
-        self.shift_count = 0
-        self.key_count = 0
-        self.apm = 0
+# Global variables to keep track of keystrokes and time
+keystrokes = 0
+start_time = time.time()
 
-        self.shift_label = tk.Label(root, text="Shift Inputs: 0")
-        self.apm_label = tk.Label(root, text="APM: 0")
-        
-        self.shift_label.pack()
-        self.apm_label.pack()
-        
-        keyboard.on_press(self.key_pressed)
+def on_key_release(key):
+    global keystrokes
+    if hasattr(key, 'char'):
+        keystrokes += 1
 
-        self.start_time = time.time()
-        self.update_apm()
+def calculate_kpm(total_keystrokes, elapsed_time):
+    return total_keystrokes / (elapsed_time / 60)
 
-    def key_pressed(self, e):
-        self.key_count += 1
-        if 'shift' in keyboard._pressed_events:
-            self.shift_count += 1
+# Create a keyboard listener
+keyboard_listener = keyboard.Listener(on_release=on_key_release)
+keyboard_listener.start()
 
-        self.update_labels()
+# Create the GUI window
+window = tk.Tk()
+window.title("Keyboard Inputs Per Minute")
 
-    def update_labels(self):
-        self.shift_label.config(text=f"Shift Inputs: {self.shift_count}")
-        self.apm_label.config(text=f"APM: {self.apm:.2f}")
+# Label to display KPM
+kpm_label = ttk.Label(window, text="KPM: 0.00")
+kpm_label.pack(padx=20, pady=20)
 
-    def update_apm(self):
-        elapsed_time = time.time() - self.start_time
-        self.apm = (self.key_count / elapsed_time) * 60
-        self.update_labels()
-        self.root.after(1000, self.update_apm)
+def update_kpm_label():
+    while True:
+        # Calculate elapsed time
+        current_time = time.time()
+        elapsed_time = current_time - start_time
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = KeyboardMonitorApp(root)
-    root.mainloop()
+        # Calculate KPM
+        kpm = calculate_kpm(keystrokes, elapsed_time)
+        kpm_label.config(text=f"KPM: {kpm:.2f}")
+
+        # Update the label every second
+        window.update()
+        time.sleep(1)
+
+# Start a separate thread to update the KPM label
+import threading
+kpm_thread = threading.Thread(target=update_kpm_label)
+kpm_thread.daemon = True
+kpm_thread.start()
+
+# Main loop to keep the GUI window open
+window.mainloop()
+
+# Gracefully exit the script on window close
+keyboard_listener.stop()
