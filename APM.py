@@ -53,7 +53,7 @@ shift_key_label.pack(padx=20, pady=10)
 data_file = open("keyboard_data.txt", "w")
 
 def update_labels():
-    global elapsed_time, kpm
+    global window, elapsed_time, kpm
     while True:
         # Calculate elapsed time
         current_time = time.time()

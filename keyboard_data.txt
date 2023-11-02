@@ -1,5 +1,5 @@
-Total Keystrokes: 12
-'q' Key Presses: 4
-'Shift' Key Presses: 0
-Total Time: 00:00:04
-KPM: 122.42
+Total Keystrokes: 61
+'q' Key Presses: 9
+'Shift' Key Presses: 4
+Total Time: 00:00:15
+KPM: 239.23
